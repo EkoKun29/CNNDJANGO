@@ -1,0 +1,53 @@
+{% load i18n static admin_adminlte %}
+
+<ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+  {% if request.user.is_authenticated %}
+  
+    <li class="nav-item {% if 'dashboardv1' in parent %} menu-open {% endif %}">
+      <a href="/" class="nav-link {% if 'dashboardv1' in segment %} active {% endif %}">
+        <i class="nav-icon fas fa-tachometer-alt"></i>
+        <p>Dashboard</p>
+      </a>
+    </li>
+
+    <li class="nav-item {% if 'form_general' in parent %} menu-open {% endif %}">
+      <a href="{% url 'form_general' %}" class="nav-link {% if 'form_general' in segment %} active {% endif %}">
+        <i class="nav-icon fas fa-edit"></i>
+        <p>Upload Resi</p>
+      </a>
+    </li>
+
+    <li class="nav-item {% if 'tables' in parent %} menu-open {% endif %}">
+      <a href="#" class="nav-link {% if 'tables' in parent %} active {% endif %}">
+        <i class="nav-icon fas fa-table"></i>
+        <p>
+          Klasifikasi
+          <i class="fas fa-angle-left right"></i>
+        </p>
+      </a>
+      <ul class="nav nav-treeview">
+        <li class="nav-item">
+          <a href="{% url 'table_jawa' %}" class="nav-link {% if 'jawa_table' in segment %} active {% endif %}">
+            <i class="far fa-circle nav-icon"></i>
+            <p>REG-JAWA</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="{% url 'table_luar-jawa' %}" class="nav-link {% if 'luar-jawa_table' in segment %} active {% endif %}">
+            <i class="far fa-circle nav-icon"></i>
+            <p>REG-LUARJAWA</p>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+
+    <li class="nav-item">
+      <a href="{% url 'logout' %}" class="nav-link">
+        <i class="fa fa-sign-out-alt nav-icon"></i>
+        <p>Logout</p>
+      </a>
+    </li>
+
+  {% endif %}
+</ul>

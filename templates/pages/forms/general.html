@@ -1,0 +1,182 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} Upload Resi {% endblock title %}
+{% block bodyclass %} hold-transition sidebar-mini {% endblock bodyclass %}
+
+{% block content %}
+<!-- Content Wrapper -->
+<div class="content-wrapper">
+  <!-- Header -->
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6"></div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="{% url 'admin:index' %}">Home</a></li>
+            <li class="breadcrumb-item active">Upload Resi</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Upload Form -->
+  <section class="content">
+    <div class="container-fluid">
+      <div class="row">
+  <!-- Kolom Form Upload (kiri) -->
+  <div class="col-md-6">
+    <div class="card card-primary">
+      <div class="card-header">
+        <h3 class="card-title">Upload Resi</h3>
+      </div>
+      <form method="POST" enctype="multipart/form-data" action="{% url 'upload-resi' %}">
+        {% csrf_token %}
+        <div class="card-body">
+          <div class="form-group">
+            <div class="input-group">
+              <div class="custom-file">
+                <input type="file" name="image" class="custom-file-input" id="exampleInputFile">
+                <label class="custom-file-label" for="exampleInputFile">Choose file</label>
+              </div>
+              <div class="input-group-append">
+                <button type="submit" class="btn btn-primary">Upload</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+      <!-- Spinner Loading Modal -->
+      <div class="modal fade" id="loadingModal" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered text-center">
+          <div class="modal-content bg-transparent border-0 shadow-none">
+            <div class="text-center">
+              <div class="spinner-border text-primary" role="status" style="width: 4rem; height: 4rem;">
+                <span class="sr-only">Loading...</span>
+              </div>
+              <p class="mt-3 font-weight-bold text-dark">Menganalisis akurasi CNN...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Kolom Hasil Scan (kanan) -->
+  <div class="col-md-6">
+    <div class="card card-info">
+      <div class="card-header">
+        <h3 class="card-title">Hasil Scan Resi</h3>
+      </div>
+      <div class="card-body text-center">
+      {% if image_url %}
+        <img src="/{{ image_url }}" width="300" class="img-thumbnail shadow mb-3" alt="Resi">
+      {% else %}
+        <p class="text-muted"><i class="fas fa-image"></i> Tidak ada hasil scan.</p>
+      {% endif %}
+
+      <ul class="list-group mb-3 text-left">
+        {% if tanggal %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span><i class="far fa-calendar-alt text-primary mr-2"></i><strong>Tanggal Uji:</strong></span>
+            <span>{{ tanggal|date:"d-m-Y" }}</span>
+          </li>
+        {% endif %}
+
+        {% if nomor_resi %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-barcode text-info mr-2"></i><strong>Nomor Resi:</strong></span>
+            <span>{{ nomor_resi }}</span>
+          </li>
+        {% endif %}
+
+        {% if wilayah %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-map-marker-alt text-success mr-2"></i><strong>Wilayah Tujuan:</strong></span>
+            <span class="badge badge-pill badge-success">{{ wilayah }}</span>
+          </li>
+        {% endif %}
+
+        {% if akurasi %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>
+              <i class="fas fa-brain text-info mr-2"></i>
+              <strong>Akurasi CNN:</strong>
+            </span>
+            
+            {% if akurasi >= 90 %}
+              <span class="badge badge-pill badge-success">{{ akurasi|floatformat:2 }}%</span>
+            {% elif akurasi >= 70 %}
+              <span class="badge badge-pill badge-warning">{{ akurasi|floatformat:2 }}%</span>
+            {% else %}
+              <span class="badge badge-pill badge-danger">{{ akurasi|floatformat:2 }}%</span>
+            {% endif %}
+          </li>
+        {% endif %}
+
+      </ul>
+
+      <a href="{% url 'form_general' %}" class="btn btn-success">
+        <i class="fas fa-arrow-left mr-1"></i> KEMBALI
+      </a>
+    </div>
+
+    </div>
+  </div>
+</div>
+    </div>
+  </section>
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+<script src="{% static 'plugins/bs-custom-file-input/bs-custom-file-input.min.js' %}"></script>
+<script src="{% static 'plugins/flot/jquery.flot.js' %}"></script>
+  
+
+<script>
+$(function () {
+  bsCustomFileInput.init();
+  var data = [], totalPoints = 100;
+  function getRandomData() {
+    if (data.length > 0) { data = data.slice(1); }
+    while (data.length < totalPoints) {
+      var prev = data.length > 0 ? data[data.length - 1] : 50;
+      var y = prev + Math.random() * 10 - 5;
+      y = Math.max(0, Math.min(100, y));
+      data.push(y);
+    }
+    var res = [];
+    for (var i = 0; i < data.length; ++i) { res.push([i, data[i]]); }
+    return res;
+  }
+
+  var interactive_plot = $.plot('#interactive', [ { data: getRandomData() } ], {
+    grid: { borderColor: '#f3f3f3', borderWidth: 1, tickColor: '#f3f3f3' },
+    series: { color: '#3c8dbc', lines: { lineWidth: 2, show: true, fill: true } },
+    yaxis: { min: 0, max: 100, show: true },
+    xaxis: { show: true }
+  });
+
+  var updateInterval = 500, realtime = 'on';
+  function update() {
+    interactive_plot.setData([getRandomData()]);
+    interactive_plot.draw();
+    if (realtime === 'on') { setTimeout(update, updateInterval); }
+  }
+  if (realtime === 'on') { update(); }
+  $('#realtime .btn').click(function () {
+    realtime = $(this).data('toggle');
+    update();
+  });
+});
+
+  document.querySelector('form').addEventListener('submit', function () {
+    $('#loadingModal').modal('show');
+  });
+
+</script>
+{% endblock extra_scripts %}
