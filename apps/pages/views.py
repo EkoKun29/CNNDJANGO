@@ -23,7 +23,24 @@ labels = ['REG_JAWA', 'REG_LUARJAWA']
 @never_cache
 @login_required(login_url='login')
 def index(request):
-    return render(request, 'pages/index.html')
+    data = Jawa.objects.all()
+    luarJawa = LuarJawa.objects.all()
+    
+    jumlah_reg_jawa = Jawa.objects.filter(lokasi_resi='REG_JAWA').count()
+    jumlah_reg_luar_jawa = LuarJawa.objects.filter(lokasi_resi='REG_LUARJAWA').count()
+
+    total_all = Jawa.objects.count() + LuarJawa.objects.count()
+
+    persen_reg_jawa = round((jumlah_reg_jawa / total_all) * 100, 2) if total_all > 0 else 0
+    persen_reg_luar_jawa = round((jumlah_reg_luar_jawa / total_all) * 100, 2) if total_all > 0 else 0
+
+    return render(request, 'pages/index.html', {
+        'data': data,
+        'jumlah_reg_jawa': jumlah_reg_jawa,
+        'persen_reg_jawa': persen_reg_jawa,
+        'jumlah_reg_luar_jawa' : jumlah_reg_luar_jawa,
+        'persen_reg_luar_jawa': persen_reg_luar_jawa,
+    })
 
 @never_cache
 @login_required(login_url='login')
